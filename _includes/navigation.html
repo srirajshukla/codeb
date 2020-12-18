@@ -1,0 +1,14 @@
+<header class="site-header" role = "banner">
+<div class="wrapper">
+    <a class="site-title" href="{{ site.data.navigation[0].link}}">
+        {{ site.title}}
+    </a>
+    <nav class="site-nav">
+        {% for item in site.data.navigation %}
+            <a href="{{ item.link }}">
+                {{item.name}}
+            </a>
+        {% endfor %}
+    </nav>
+</div>
+</header>
