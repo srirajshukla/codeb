@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/codeb/feed.xml" rel="self" type="application/atom+xml" /><link href="/codeb/" rel="alternate" type="text/html" /><updated>2021-04-24T17:35:02+00:00</updated><id>/codeb/feed.xml</id><title type="html">Gyanendra’s Blog</title><entry><title type="html">Django Auto Time</title><link href="/codeb/2020/12/18/django-auto-time/" rel="alternate" type="text/html" title="Django Auto Time" /><published>2020-12-18T00:00:00+00:00</published><updated>2020-12-18T00:00:00+00:00</updated><id>/codeb/2020/12/18/django-auto-time</id><content type="html" xml:base="/codeb/2020/12/18/django-auto-time/">&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto_now&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto_add_now&lt;/code&gt; are attributes to Django &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DateTimeField&lt;/code&gt; methods.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto_now&lt;/code&gt; changes the field to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;timezone.now&lt;/code&gt; whenever the field is saved, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto_now_add&lt;/code&gt; on the other hand only updates the field once when it is created.&lt;/p&gt;
+
+&lt;p&gt;Let’s say you have created a model like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TimeTest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;created&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DateTimeField&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;auto_now_add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;updated&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;models&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DateTimeField&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;auto_now&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, for some reasons, you want to update the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;created&lt;/code&gt; field in your model - You Can’t.&lt;/p&gt;
+
+&lt;p&gt;So you think, what can I do, you do some googling, and find that there’s a property called editable.&lt;/p&gt;
+
+&lt;p&gt;So you set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;created.editable = True&lt;/code&gt;, and voila it works. In your Django Admin panel the created field is now editable.&lt;/p&gt;
+
+&lt;p&gt;What’s the problem then?&lt;/p&gt;
+
+&lt;h2 id=&quot;addressing-the-issue&quot;&gt;Addressing the Issue&lt;/h2&gt;
+
+&lt;p&gt;When you try to update the model, and rerun the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;makemigration&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;migrate&lt;/code&gt; commands, you get an error saying&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;k&quot;&gt;del&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kwargs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'editable'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;KeyError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'editable'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is because you can’t make the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DateTimeField&lt;/code&gt; editable in the model, so when you try to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;makemigrate&lt;/code&gt; your model, python throws tantrums.&lt;/p&gt;
+
+&lt;p&gt;In my opinion, this has been done to prevent accident changes to data that are supposed to store the DateTime of object creation. However, you can change this time - after migrating your models, you can just change the field to be editable,&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# Uncomment for testing purposes only
+# Causes key error while migration because auto_now_add is uneditable by default
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;created&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;editable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then you can change the fields now. When you’re done you can change the model back to its original state.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-better-solution&quot;&gt;A Better Solution?&lt;/h2&gt;
+
+&lt;p&gt;When you encounter this problem, you may want to rethink whether you truly want the field to have &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto_now_add&lt;/code&gt; as well as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;editable=True&lt;/code&gt;. If the answer is no, then great, fix your model.&lt;/p&gt;
+
+&lt;p&gt;If yes, then you need some workaround. One of the most common ways is to entirely avoid auto_now_add and instead pass the time of object creation explicitly. This way you can control the time easily. Another solution is to create a new data type that inherits from Django &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DataTimeField&lt;/code&gt; and modify as per your needs as discussed here &lt;a href=&quot;https://stackoverflow.com/a/1737078/4748060&quot;&gt;https://stackoverflow.com/a/1737078/4748060&lt;/a&gt;.&lt;/p&gt;</content><author><name>gyan</name></author><summary type="html">auto_now and auto_add_now are attributes to Django DateTimeField methods.</summary></entry></feed>

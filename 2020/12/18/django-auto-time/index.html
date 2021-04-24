@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Auto Time</title>
+    <link rel="stylesheet" href="/codeb/assets/css/styles.css"> 
+    <link type="application/atom+xml" rel="alternate" href="/codeb/feed.xml" title="Gyanendra's Blog" />
+    <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Django Auto Time | Gyanendra’s Blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Django Auto Time" />
+<meta name="author" content="gyan" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="auto_now and auto_add_now are attributes to Django DateTimeField methods." />
+<meta property="og:description" content="auto_now and auto_add_now are attributes to Django DateTimeField methods." />
+<meta property="og:site_name" content="Gyanendra’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-12-18T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Django Auto Time" />
+<script type="application/ld+json">
+{"description":"auto_now and auto_add_now are attributes to Django DateTimeField methods.","url":"/codeb/2020/12/18/django-auto-time/","@type":"BlogPosting","headline":"Django Auto Time","dateModified":"2020-12-18T00:00:00+00:00","datePublished":"2020-12-18T00:00:00+00:00","author":{"@type":"Person","name":"gyan"},"mainEntityOfPage":{"@type":"WebPage","@id":"/codeb/2020/12/18/django-auto-time/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+      
+    <div class="container content">
+            <header class="masthead">
+              <h3 class="masthead-title">
+                <a href="/codeb/" title="Home">Gyanendra's Blog</a>
+                <small>Things that I'm trying and Find Cool</small>
+              </h3>
+            </header>
+            <main>
+              <article class="post">
+    <h1 class="post-title">The Problem with auto_now and auto_now_add in Django.</h1>
+    <time datetime="2020-12-18T00:00:00+00:00" class="post-date">18 Dec 2020</time>
+    <p><code class="language-plaintext highlighter-rouge">auto_now</code> and <code class="language-plaintext highlighter-rouge">auto_add_now</code> are attributes to Django <code class="language-plaintext highlighter-rouge">DateTimeField</code> methods.</p>
+
+<p><code class="language-plaintext highlighter-rouge">auto_now</code> changes the field to <code class="language-plaintext highlighter-rouge">timezone.now</code> whenever the field is saved, <code class="language-plaintext highlighter-rouge">auto_now_add</code> on the other hand only updates the field once when it is created.</p>
+
+<p>Let’s say you have created a model like this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TimeTest</span><span class="p">(</span><span class="n">models</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">created</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">updated</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now, for some reasons, you want to update the <code class="language-plaintext highlighter-rouge">created</code> field in your model - You Can’t.</p>
+
+<p>So you think, what can I do, you do some googling, and find that there’s a property called editable.</p>
+
+<p>So you set <code class="language-plaintext highlighter-rouge">created.editable = True</code>, and voila it works. In your Django Admin panel the created field is now editable.</p>
+
+<p>What’s the problem then?</p>
+
+<h2 id="addressing-the-issue">Addressing the Issue</h2>
+
+<p>When you try to update the model, and rerun the <code class="language-plaintext highlighter-rouge">makemigration</code> or <code class="language-plaintext highlighter-rouge">migrate</code> commands, you get an error saying</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">'editable'</span><span class="p">]</span>
+<span class="nb">KeyError</span><span class="p">:</span> <span class="s">'editable'</span>
+</code></pre></div></div>
+
+<p>This is because you can’t make the <code class="language-plaintext highlighter-rouge">DateTimeField</code> editable in the model, so when you try to <code class="language-plaintext highlighter-rouge">makemigrate</code> your model, python throws tantrums.</p>
+
+<p>In my opinion, this has been done to prevent accident changes to data that are supposed to store the DateTime of object creation. However, you can change this time - after migrating your models, you can just change the field to be editable,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Uncomment for testing purposes only
+# Causes key error while migration because auto_now_add is uneditable by default
+</span><span class="n">created</span><span class="p">.</span><span class="n">editable</span> <span class="o">=</span> <span class="bp">True</span>
+</code></pre></div></div>
+
+<p>Then you can change the fields now. When you’re done you can change the model back to its original state.</p>
+
+<h2 id="a-better-solution">A Better Solution?</h2>
+
+<p>When you encounter this problem, you may want to rethink whether you truly want the field to have <code class="language-plaintext highlighter-rouge">auto_now_add</code> as well as <code class="language-plaintext highlighter-rouge">editable=True</code>. If the answer is no, then great, fix your model.</p>
+
+<p>If yes, then you need some workaround. One of the most common ways is to entirely avoid auto_now_add and instead pass the time of object creation explicitly. This way you can control the time easily. Another solution is to create a new data type that inherits from Django <code class="language-plaintext highlighter-rouge">DataTimeField</code> and modify as per your needs as discussed here <a href="https://stackoverflow.com/a/1737078/4748060">https://stackoverflow.com/a/1737078/4748060</a>.</p>
+
+
+  </article>
+  
+  
+  
+            </main>
+      
+            <footer class="footer">
+              <small>
+                &copy; <time datetime="2021-04-24T17:35:02+00:00">2021</time>. All rights reserved.
+              </small> 
+
+              
+<div class="wrapper">
+    <nav>
+        
+            <a href="/codeb/">
+                Home
+            </a>
+        
+            <a href="/codeb/about/">
+                About
+            </a>
+        
+    </nav>
+</div>
+
+            </footer>
+          </div>
+</body>
+</html>
