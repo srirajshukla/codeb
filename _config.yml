@@ -1,8 +1,11 @@
-title: CodeB
+title: Gyanendra's Blog
+tagline: Things that I'm trying and Find Cool
 baseurl: "/codeb"
-
+paginate: 3
+permalink: pretty
 
 plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+  - jekyll-paginate
