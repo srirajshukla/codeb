@@ -2,6 +2,7 @@
 layout: post
 author: gyan
 heading: The Problem with auto_now and auto_now_add in Django.
+summary: Django's auto_now changes the field to timezone.now whenever the field is saved, auto_now_add on the other hand only updates the field once when it is created. 
 ---
 `auto_now` and `auto_add_now` are attributes to Django `DateTimeField` methods. 
 

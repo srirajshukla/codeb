@@ -1,9 +1,6 @@
-<header class="site-header" role = "banner">
+
 <div class="wrapper">
-    <a class="site-title" href="{{ site.data.navigation[0].link | relative_url}}">
-        {{ site.title}}
-    </a>
-    <nav class="site-nav">
+    <nav>
         {% for item in site.data.navigation %}
             <a href="{{ item.link | relative_url}}">
                 {{item.name}}
@@ -11,4 +8,3 @@
         {% endfor %}
     </nav>
 </div>
-</header>

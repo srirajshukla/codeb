@@ -2,20 +2,21 @@
 layout: default
 title: Home
 ---
-<h1>
-    Articles - 
-</h1>
-<ul>
+
+<div class="posts">
     {% for post in site.posts %}
-    <li>
-        <h2>
-            <a href="{{post.url | relative_url}}">
-                {{post.title}}
-            </a>
-        </h2>
-        <p>
-            {{post.excerpt}}
-        </p>
-    </li>
+    <article class="post">
+      <h1 class="post-title">
+        <a href="{{ post.url | relative_url }}">
+          {{ post.heading }}
+        </a>
+      </h1>
+  
+      <time datetime="{{ post.date | date_to_xmlschema }}" class="post-date">{{ post.date | date_to_string }}</time>
+  
+      {{ post.summary }}
+    </article>
     {% endfor %}
-</ul>
+  </div>
+
+  
